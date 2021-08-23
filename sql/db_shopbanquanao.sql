@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th8 04, 2021 lúc 06:03 PM
+-- Thời gian đã tạo: Th8 23, 2021 lúc 05:09 PM
 -- Phiên bản máy phục vụ: 10.4.11-MariaDB
 -- Phiên bản PHP: 7.4.1
 
@@ -26,77 +26,77 @@ DELIMITER $$
 --
 -- Thủ tục
 --
-CREATE  PROCEDURE `avgRating` (IN `pro_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `avgRating` (IN `pro_ID` INT)  BEGIN
 	SELECT products.proID, AVG(comments.comRating) AS avgRating
 	FROM products INNER JOIN comments ON products.proID = comments.proID
 	WHERE products.proID = pro_ID
 	GROUP BY products.proID;
 END$$
 
-CREATE  PROCEDURE `changePasswordByUID` (IN `u_ID` INT, IN `pass` VARCHAR(32), IN `UpdateAt` DATETIME)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `changePasswordByUID` (IN `u_ID` INT, IN `pass` VARCHAR(32), IN `UpdateAt` DATETIME)  BEGIN
 	UPDATE `user` SET 
 	uPassword = pass,
 	uUpdateAt = UpdateAt
 	WHERE uID = u_ID;
 END$$
 
-CREATE  PROCEDURE `findBill` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findBill` (IN `id` INT)  BEGIN 
 	SELECT * FROM bill WHERE biID = id; 
 END$$
 
-CREATE  PROCEDURE `findBillByUid` (IN `u_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findBillByUid` (IN `u_ID` INT)  BEGIN
 	SELECT bill.biName,bill.biID, bill.biFirstName, bill.biLastName, bill.biCreateAt,bill.biAddress,bill.biWards,bill.biDistrict,bill.biProvince,bill.biStatus, SUM(bill_details.bidPrice*bill_details.bidQuantity) AS totalMoney
 	FROM bill INNER JOIN bill_details ON bill.biID = bill_details.biID
 	WHERE uID = u_ID
-	GROUP BY bill.biID, bill.biFirstName, bill.biLastName, bill.biCreateAt,bill.biAddress,bill.biStatus;
+	GROUP BY bill.biID, bill.biFirstName, bill.biLastName, bill.biCreateAt,bill.biAddress,bill.biStatus ORDER BY bill.biCreateAt DESC;
 END$$
 
-CREATE  PROCEDURE `findBillDetailsBybiID` (IN `bi_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findBillDetailsBybiID` (IN `bi_ID` INT)  BEGIN
 	SELECT * FROM (bill_details INNER JOIN product_colors ON bill_details.procID = product_colors.procID) INNER JOIN products ON product_colors.proID = products.proID WHERE bill_details.biID = bi_ID;
 END$$
 
-CREATE  PROCEDURE `findCategory` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findCategory` (IN `id` INT)  BEGIN 
 SELECT * from categories WHERE cateID = id; 
 END$$
 
-CREATE  PROCEDURE `findCateOfProduct` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findCateOfProduct` (IN `id` INT)  BEGIN 
 	SELECT cate.cateID,cate.cateName FROM categories cate INNER JOIN products pr ON pr.cateID = cate.cateID WHERE pr.proID = id AND cate.cateIsDelete = 0 AND cate.cateStatus = 0 AND pr.proIsDelete = 0 AND pr.proStatus = 0; 
 END$$
 
-CREATE  PROCEDURE `findColor` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findColor` (IN `id` INT)  BEGIN 
 	SELECT * FROM colors WHERE coID = id and colorIsDelete = 0 and coStatus = 0; 
 END$$
 
-CREATE  PROCEDURE `findColorbyID` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findColorbyID` (IN `id` INT)  BEGIN 
 	        SELECT pc.proID, pc.coID,co.coColor,pc.procQuantity from product_colors pc INNER JOIN colors co ON pc.coID = co.coID WHERE pc.procStatus = 0 AND pc.procIsDelete = 0 AND co.coStatus = 0 AND co.colorIsDelete = 0 and pc.proID = id ;
 END$$
 
-CREATE  PROCEDURE `findColorOfProduct` (IN `id` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findColorOfProduct` (IN `id` INT)  BEGIN
 	SELECT colors.coID, product_colors.procQuantity, colors.coColor, colors.coCode
     FROM (products INNER JOIN product_colors ON products.proID = product_colors.proID)
     		INNER JOIN colors ON product_colors.coID = colors.coID
     WHERE products.proID = id AND procIsDelete = 0 AND colors.colorIsDelete = 0;
 END$$
 
-CREATE  PROCEDURE `findComment` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findComment` (IN `id` INT)  BEGIN 
 	SELECT * FROM comments WHERE comID = id; 
 END$$
 
-CREATE  PROCEDURE `findCommentOfCustomer` (IN `u_ID` INT, IN `pro_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findCommentOfCustomer` (IN `u_ID` INT, IN `pro_ID` INT)  BEGIN
 	SELECT comments.comID
 	FROM (products INNER JOIN comments ON products.proID = comments.proID) INNER JOIN user ON comments.uID = user.uID
  	WHERE user.uID = u_ID AND products.proID = pro_ID;
 END$$
 
-CREATE  PROCEDURE `findCommentOfProduct` (IN `id` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findCommentOfProduct` (IN `id` INT)  BEGIN
 	SELECT comments.comID, comments.comContent, `user`.uFirstName, `user`.uLastName,comments.comRating,comments.comPublishedAt
 	FROM (products INNER JOIN comments ON products.proID = comments.proID) INNER JOIN `user` ON comments.uID = `user`.uID
  	WHERE products.proID = id AND comments.comStatus = 0;
 END$$
 
-CREATE  PROCEDURE `findProduct` (IN `id` INT)  BEGIN SELECT * FROM products WHERE proIsDelete = 0 AND proStatus = 0 AND proID = id; END$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findProduct` (IN `id` INT)  BEGIN SELECT * FROM products WHERE proIsDelete = 0 AND proStatus = 0 AND proID = id; END$$
 
-CREATE  PROCEDURE `findProductInBillDetail` (IN `idPro` INT, IN `idUser` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findProductInBillDetail` (IN `idPro` INT, IN `idUser` INT)  BEGIN
 	SELECT *
 	FROM ((products INNER JOIN product_colors ON products.proID = product_colors.proID)
 		INNER JOIN bill_details ON bill_details.procID = product_colors.procID)
@@ -104,11 +104,11 @@ CREATE  PROCEDURE `findProductInBillDetail` (IN `idPro` INT, IN `idUser` INT)  B
 	WHERE products.proID = idPro AND bill.uID = idUser AND bill.biStatus = 3;
 END$$
 
-CREATE  PROCEDURE `findUser` (IN `id` INT)  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `findUser` (IN `id` INT)  BEGIN 
 	SELECT * FROM user WHERE uID = id; 
 END$$
 
-CREATE  PROCEDURE `get10ProductSameCategory` (IN `pro_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get10ProductSameCategory` (IN `pro_ID` INT)  BEGIN
 	SELECT *
 	FROM products
 	WHERE cateID = (SELECT categories.cateID
@@ -118,32 +118,32 @@ CREATE  PROCEDURE `get10ProductSameCategory` (IN `pro_ID` INT)  BEGIN
 	LIMIT 0,10;
 END$$
 
-CREATE  PROCEDURE `insertBill` (IN `bi_Name` VARCHAR(10), IN `bi_FirstName` VARCHAR(50), IN `bi_LastName` VARCHAR(50), IN `bi_Mobile` VARCHAR(15), IN `bi_Email` VARCHAR(50), IN `bi_Address` VARCHAR(50), IN `bi_Country` VARCHAR(50), IN `bi_City` VARCHAR(50), IN `bi_CreateAt` DATETIME, IN `bi_Status` TINYINT, IN `pay_ID` INT, IN `u_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertBill` (IN `bi_Name` VARCHAR(10), IN `bi_FirstName` VARCHAR(50), IN `bi_LastName` VARCHAR(50), IN `bi_Mobile` VARCHAR(15), IN `bi_Email` VARCHAR(50), IN `bi_Address` VARCHAR(50), IN `bi_Country` VARCHAR(50), IN `bi_City` VARCHAR(50), IN `bi_CreateAt` DATETIME, IN `bi_Status` TINYINT, IN `pay_ID` INT, IN `u_ID` INT)  BEGIN
 	INSERT INTO bill(biName,biFirstName, biLastName, biMobile, biEmail, biAddress, biCountry, biCity, biCreateAt, biStatus, payID, uID)
 	VALUES 	(bi_Name,bi_FirstName, bi_LastName, bi_Mobile, bi_Email, bi_Address, bi_Country, bi_City, bi_CreateAt, bi_Status, pay_ID, u_ID);
 END$$
 
-CREATE  PROCEDURE `insertBillDetail` (IN `bid_Quantity` INT, IN `bid_Price` INT, IN `bi_ID` INT, IN `proc_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertBillDetail` (IN `bid_Quantity` INT, IN `bid_Price` INT, IN `bi_ID` INT, IN `proc_ID` INT)  BEGIN
 	INSERT INTO bill_details(bidQuantity, bidPrice, biID, procID)
 	VALUES	(bid_Quantity, bid_Price, bi_ID, proc_ID);
 END$$
 
-CREATE  PROCEDURE `insertComment` (IN `com_Rating` SMALLINT, IN `com_Content` VARCHAR(255), IN `pro_ID` INT, IN `u_ID` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertComment` (IN `com_Rating` SMALLINT, IN `com_Content` VARCHAR(255), IN `pro_ID` INT, IN `u_ID` INT)  BEGIN
 	INSERT INTO comments(comRating, comContent, proID, uID)
 	VALUES (com_Rating, com_Content, pro_ID, u_ID);
 END$$
 
-CREATE  PROCEDURE `insertFeedBack` (IN `fName` VARCHAR(255), IN `fEmail` VARCHAR(255), IN `fContent` VARCHAR(1000), IN `fCreateAt` DATETIME)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertFeedBack` (IN `fName` VARCHAR(255), IN `fEmail` VARCHAR(255), IN `fContent` VARCHAR(1000), IN `fCreateAt` DATETIME)  BEGIN
 	INSERT INTO feedback(fbName,fbEmail,fbContent,fbCreateAt)
 	VALUES	(fName, fEmail, fContent,fCreateAt);
 END$$
 
-CREATE  PROCEDURE `insertUser` (IN `u_FirstName` VARCHAR(50), IN `u_LastName` VARCHAR(50), IN `u_Mobile` VARCHAR(15), IN `u_Email` VARCHAR(255), IN `u_Password` VARCHAR(32), IN `u_RegisteredAt` DATETIME)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertUser` (IN `u_FirstName` VARCHAR(50), IN `u_LastName` VARCHAR(50), IN `u_Mobile` VARCHAR(15), IN `u_Email` VARCHAR(255), IN `u_Password` VARCHAR(32), IN `u_RegisteredAt` DATETIME)  BEGIN
 	INSERT INTO user(uFirstName, uLastName, uMobile, uEmail, uPassword, uRegisteredAt)
 	VALUES (u_FirstName, u_LastName, u_Mobile, u_Email, u_Password, u_RegisteredAt);
 END$$
 
-CREATE  PROCEDURE `mostBoughtProduct` (IN `inYear` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `mostBoughtProduct` (IN `inYear` INT)  BEGIN
 	SELECT products.proID, products.proTitle, SUM(bill_details.bidQuantity) AS sumQuanity
 	FROM (products INNER JOIN bill_details ON products.proID = bill_details.proID)
 			INNER JOIN bill ON bill_details.biID = bill.biID
@@ -153,15 +153,15 @@ CREATE  PROCEDURE `mostBoughtProduct` (IN `inYear` INT)  BEGIN
 	LIMIT 0,2;
 END$$
 
-CREATE  PROCEDURE `procLogin` (IN `email` VARCHAR(50), IN `pass` VARCHAR(32))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `procLogin` (IN `email` VARCHAR(50), IN `pass` VARCHAR(32))  BEGIN
 	select * from user where uEmail = email and uPassword = pass and uIsDelete = 0;
 END$$
 
-CREATE  PROCEDURE `searchProduct` (IN `pro_Title` VARCHAR(255))  BEGIN 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `searchProduct` (IN `pro_Title` VARCHAR(255))  BEGIN 
 	SELECT * FROM products WHERE proTitle LIKE CONCAT('%',pro_Title,'%'); 
 END$$
 
-CREATE  PROCEDURE `updateInfoUser` (IN `u_ID` INT, IN `u_FirstName` VARCHAR(50), IN `u_LastName` VARCHAR(50), IN `u_Mobile` VARCHAR(15), IN `u_Address` VARCHAR(255), IN `u_Province` INT, IN `u_District` INT, IN `u_Wards` INT, IN `UpdateAt` DATETIME)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateInfoUser` (IN `u_ID` INT, IN `u_FirstName` VARCHAR(50), IN `u_LastName` VARCHAR(50), IN `u_Mobile` VARCHAR(15), IN `u_Address` VARCHAR(255), IN `u_Province` INT, IN `u_District` INT, IN `u_Wards` INT, IN `UpdateAt` DATETIME)  BEGIN
 	UPDATE user
 	SET	uFirstName = u_FirstName,
 		uLastName = u_LastName, 
@@ -234,7 +234,11 @@ INSERT INTO `bill` (`biID`, `biName`, `biFirstName`, `biLastName`, `biMobile`, `
 (36, 'G3NFQAZJCY', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-04 17:13:56', NULL, 0, 249, 0, 1, 1),
 (37, 'S982PUCKJH', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-04 17:14:27', NULL, 0, 195, 0, 1, 1),
 (38, 'LABRQ01SMH', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-04 17:42:33', '2021-08-04 17:42:40', 0, 470, 4, 1, 1),
-(39, 'E5R2SYOL1W', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-04 17:43:25', NULL, 0, 468, 0, 1, 1);
+(39, 'E5R2SYOL1W', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-04 17:43:25', NULL, 0, 468, 0, 1, 1),
+(40, 'J0OXEAMBPK', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-14 16:30:36', '2021-08-14 16:31:23', 0, 503, 1, 1, 1),
+(41, '94UNB7C0WZ', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-22 18:55:20', '2021-08-22 20:25:59', 0, 525, 3, 1, 1),
+(42, 'BTYGIOJFX2', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-23 01:07:53', NULL, 0, 195, 0, 1, 1),
+(43, 'MW9IH2X7NK', 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'Hoành Cừ', '38', '395', '15541', '2021-08-23 22:00:05', '2021-08-23 22:00:18', 0, 249, 4, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -263,7 +267,13 @@ INSERT INTO `bill_details` (`bidID`, `bidQuantity`, `bidPrice`, `biID`, `procID`
 (58, 1, '150.00', 37, 3),
 (59, 1, '250.00', 38, 31),
 (60, 1, '150.00', 38, 10),
-(61, 2, '199.00', 39, 17);
+(61, 2, '199.00', 39, 17),
+(62, 1, '250.00', 40, 31),
+(63, 1, '180.00', 40, 4),
+(64, 2, '150.00', 41, 9),
+(65, 1, '150.00', 41, 10),
+(66, 1, '150.00', 42, 10),
+(67, 1, '199.00', 43, 3);
 
 -- --------------------------------------------------------
 
@@ -305,7 +315,7 @@ CREATE TABLE `colors` (
 --
 
 INSERT INTO `colors` (`coID`, `coColor`, `coCode`, `colorIsDelete`, `coStatus`) VALUES
-(1, 'Trắng', '#ffffff', 0, 0),
+(1, 'Trắng', '#ffffff', 1, 0),
 (2, 'Đen', '#000000 ', 0, 0),
 (3, 'Xám', '#6a7a7b', 0, 0),
 (4, 'Hồng', '#e826f3', 0, 0),
@@ -365,7 +375,7 @@ INSERT INTO `discounts` (`disID`, `disCode`, `disValue`, `disStart`, `disEnd`, `
 (1, 'testdiscount', '50', '2021-07-21 10:45:00', '2021-07-01 08:07:00', 5, 1, 0, 0, 3),
 (2, 'maend', '45', '2021-07-28 01:13:27', '2021-06-04 14:35:49', 10, 5, 0, 1, 3),
 (3, 'mafull', '25', '2021-07-21 10:45:21', '2021-06-10 16:18:10', 5, 4, 0, 0, 3),
-(4, 'newcoupon', '25', '2021-07-28 15:00:00', '2021-07-28 15:15:00', 10, NULL, 0, 0, 3);
+(4, 'newcoupon', '25', '2021-08-23 21:59:24', '2021-08-31 15:15:00', 10, NULL, 0, 0, 3);
 
 -- --------------------------------------------------------
 
@@ -422,7 +432,11 @@ INSERT INTO `logbuyproduct` (`logBuyID`, `nameBill`, `logBuyContent`, `uID`, `lo
 (20, 'G3NFQAZJCY', 'đặt hàng thành công', 1, '2021-08-04 17:13:56'),
 (21, 'S982PUCKJH', 'đặt hàng thành công', 1, '2021-08-04 17:14:27'),
 (22, 'LABRQ01SMH', 'đặt hàng thành công', 1, '2021-08-04 17:42:33'),
-(23, 'E5R2SYOL1W', 'đặt hàng thành công', 1, '2021-08-04 17:43:25');
+(23, 'E5R2SYOL1W', 'đặt hàng thành công', 1, '2021-08-04 17:43:25'),
+(24, 'J0OXEAMBPK', 'đặt hàng thành công', 1, '2021-08-14 16:30:36'),
+(25, '94UNB7C0WZ', 'đặt hàng thành công', 1, '2021-08-22 18:55:20'),
+(26, 'BTYGIOJFX2', 'đặt hàng thành công', 1, '2021-08-23 01:07:53'),
+(27, 'MW9IH2X7NK', 'đặt hàng thành công', 1, '2021-08-23 22:00:05');
 
 -- --------------------------------------------------------
 
@@ -456,7 +470,16 @@ INSERT INTO `logs` (`logID`, `logTime`, `logUID`, `logRole`, `logContent`) VALUE
 (178, '2021-08-04 22:58:40', 16, 0, 'Đã gửi mã OTP tới khách hàng run2****@eoopy.com'),
 (179, '2021-08-04 22:59:01', 16, 0, 'Đã gửi mã OTP tới khách hàng run2****@eoopy.com'),
 (180, '2021-08-04 22:59:26', 16, 0, 'Đã gửi mã OTP tới khách hàng run2****@eoopy.com'),
-(181, '2021-08-04 22:59:41', 16, 0, 'Khách hàng 123a 123b - run2****@eoopy.com đã kích hoạt tài khoản thành công!');
+(181, '2021-08-04 22:59:41', 16, 0, 'Khách hàng 123a 123b - run2****@eoopy.com đã kích hoạt tài khoản thành công!'),
+(182, '2021-08-14 16:29:43', 1, 0, 'Khách hàng Lê Công Tuấn Vũ - tuanvu******@gmail.com thực hiện đăng nhập hệ thống thành công!'),
+(183, '2021-08-14 16:31:23', 3, 1, 'Cập nhật trạng thái đơn hàng <b>#J0OXEAMBPK</b> thành công.'),
+(184, '2021-08-14 16:32:25', 3, 1, 'Xóa thành công sản phẩm <b>ÁO PHÔNG MARVEL S21 BOOZILLA UN</b>'),
+(185, '2021-08-14 16:35:12', 3, 1, 'Xóa thành công màu sắc <b>Trắng</b>'),
+(186, '2021-08-22 20:25:59', 3, 1, 'Cập nhật trạng thái đơn hàng <b>#94UNB7C0WZ</b> thành công.'),
+(187, '2021-08-23 17:24:45', 1, 0, 'Khách hàng Lê Công Tuấn Vũ - tuanvu******@gmail.com thực hiện đăng nhập hệ thống thành công!'),
+(188, '2021-08-23 21:56:07', 17, 0, 'Đã gửi mã OTP tới khách hàng egs9****@zwoho.com'),
+(189, '2021-08-23 21:57:02', 1, 0, 'Khách hàng Lê Công Tuấn Vũ - tuanvu******@gmail.com thực hiện đăng nhập hệ thống thành công!'),
+(190, '2021-08-23 22:00:18', 1, 0, 'Khách hàng hủy đơn hàng <b>#MW9IH2X7NK</b>');
 
 -- --------------------------------------------------------
 
@@ -534,7 +557,7 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`proID`, `adID`, `proTitle`, `proPrice`, `proDiscount`, `proCreateAt`, `proUpdateAt`, `proImage`, `proImage1`, `proImage2`, `proImage3`, `proDescription`, `proIsDelete`, `proStatus`, `cateID`) VALUES
 (1, 3, 'ÁO PHÔNG NAM MARVEL REGULAR MARVEL COMIC', '199.00', NULL, '2021-05-12 18:37:37', '2021-07-14 13:54:53', '1/product01-nam01.jpg', '1/product01-nam02.jpg', '1/product01-nam03.jpg', '1/product01-nam04.jpg', '• Là item không thể thiếu trong tủ đồ vì sự thoải mái, dễ chịu, lại rất dễ phối đồ. <br />\r\n• Sản phẩm 100% cotton, đường may tinh tế chắc chắn với bề mặt vải mềm mại, thấm hút mồ hôi tốt tạo cảm giác thoáng mát cho người mặc. <br />\r\n• Form áo cơ bản, vừa vặn cơ thể, thoải mái theo từng cử động. <br />\r\n• Không ra màu, không bai, không xù, không bám dính.\r\n', 0, 0, 1),
-(2, 3, 'ÁO PHÔNG MARVEL S21 BOOZILLA UN', '299.00', '180.00', '2021-05-12 18:37:44', '2021-07-14 13:54:53', '1/product02-nam01.jpg', '1/product02-nam02.jpg', '1/product02-nam03.jpg', '1/product02-nam04.jpg', '• Là item không thể thiếu trong tủ đồ vì sự thoải mái, dễ chịu, lại rất dễ phối đồ. <br />\r\n• Sản phẩm 100% cotton, đường may tinh tế chắc chắn với bề mặt vải mềm mại, thấm hút mồ hôi tốt tạo cảm giác thoáng mát cho người mặc. <br />\r\n• Form áo cơ bản, vừa vặn cơ thể, thoải mái theo từng cử động. <br />\r\n• Không ra màu, không bai, không xù, không bám dính.\r\n', 0, 0, 1),
+(2, 3, 'ÁO PHÔNG MARVEL S21 BOOZILLA UN', '299.00', '180.00', '2021-05-12 18:37:44', '2021-08-23 17:04:11', '1/product02-nam01.jpg', '1/product02-nam02.jpg', '1/product02-nam03.jpg', '1/product02-nam04.jpg', '• Là item không thể thiếu trong tủ đồ vì sự thoải mái, dễ chịu, lại rất dễ phối đồ. <br />\r\n• Sản phẩm 100% cotton, đường may tinh tế chắc chắn với bề mặt vải mềm mại, thấm hút mồ hôi tốt tạo cảm giác thoáng mát cho người mặc. <br />\r\n• Form áo cơ bản, vừa vặn cơ thể, thoải mái theo từng cử động. <br />\r\n• Không ra màu, không bai, không xù, không bám dính.\r\n', 0, 0, 1),
 (3, 3, 'QUẦN JEANS NỮ CROP STRAIGHT', '150.00', NULL, '2021-05-12 18:37:49', '2021-07-14 13:54:53', '2/product01-nu01.jpg', '2/product01-nu02.jpg', '2/product01-nu03.jpg', '2/product01-nu04.jpg', '• Mẫu quần có ống quần suông, tương đối rộng rãi, mang lại cảm giác thoải mái, vừa che khuyết điểm bắp chân to, chân cong rất hiệu quả.<br />\r\n• Quần thiết kế lưng cao, che bụng và tôn dáng kéo dài đôi chân cho cô nàng tạo vẻ bề ngoài cực sang chảnh.<br />\r\n• Là item không thể thiếu trong tủ đồ vì sự thoải mái, dễ chịu, lại rất dễ phối đồ: sơ mi, thun, 2 dây, croptop đều đẹp.<br />\r\n• Sản phẩm 100% cotton, đường may tinh tế chắc chắn với bề mặt vải mềm mại, thấm hút mồ hôi tốt tạo cảm giác thoáng mát cho người mặc.<br />\r\n• Chất liệu vải jean mềm mịn, không nhăn, không xù lông, giữ dáng, không phai màu.<br />\r\n', 0, 0, 2),
 (10, 3, 'ÁO KIỂU NỮ CROP CỔ VUÔNG', '199.00', NULL, '2021-05-12 18:38:00', '2021-07-14 13:54:53', '2/product02-nu01.jpg', '2/product02-nu02.jpg', '2/product02-nu03.jpg', '2/product02-nu04.jpg', '• Croptop là kiểu áo có độ dài ngắn lửng đến eo hoặc dài hơn một chút để lộ phần eo. Chính vì độ dài tương đối ngắn này mà croptop chỉ trở nên phổ biến trong làng thời trang nữ. <br />\r\n• Với sự đa về kiểu dáng, chất liệu và họa tiết, áo croptop là một item thời trang lý tưởng với nhiều cách kết hợp khác nhau dành cho những chị em theo đuổi phong cách trẻ trung, năng động và quyến rũ. <br />\r\n• Rất dễ dàng để nhìn thấy trên đường một cô gái năng động và phóng khoáng với áo croptop mix cùng quần jean hay váy cạp cao. Điều này cho thấy croptop đang dần bước vào giai đoạn hoàng kim và được rất nhiều các tín đồ thời trang ưa chuộng. <br />\r\n• Sản phẩm 100% cotton, đường may tinh tế chắc chắn với bề mặt vải mềm mại, thấm hút mồ hôi tốt tạo cảm giác thoáng mát cho người mặc. <br />\r\n• Không ra màu, không bai, không xù, không bám dính. <br />\r\n• Cổ vuông; áo kiểu tay ngắn. <br />\r\n', 0, 0, 2),
 (11, 3, 'QUẦN JOGGER NAM MARVEL', '250.00', '199.00', '2021-05-12 18:48:40', '2021-07-14 13:54:53', '1/quan-jogger-nam-marvel-bqqlq-3.jpg', '1/quan-jogger-nam-marvel-fcmwk-2.jpg', '1/quan-jogger-nam-marvel-grmnn-1.jpg', NULL, '• Là item không thể thiếu trong tủ đồ vì sự thoải mái, dễ chịu, lại rất dễ phối đồ.<br />\r\n• Áo thun unisex thích hợp với cả nam và nữ. Mặc làm áo thun cặp, áo nhóm rất phù hợp.<br />\r\n• Sản phẩm 100% cotton, đường may tinh tế chắc chắn với bề mặt vải mềm mại, thấm hút mồ hôi tốt tạo cảm giác thoáng mát cho người mặc.<br />\r\n• Form áo cơ bản, vừa vặn cơ thể, thoải mái theo từng cử động.<br />\r\n• Không ra màu, không bai, không xù, không bám dính.<br />\r\n• Họa tiết được in lên trước ngực áo, có độ bền cao.<br />', 0, 0, 1),
@@ -546,8 +569,8 @@ INSERT INTO `products` (`proID`, `adID`, `proTitle`, `proPrice`, `proDiscount`, 
 (17, 3, 'ÁO PHÔNG NỮ License 1 - Marvel LOOSE THOR', '250.00', NULL, '2021-07-08 14:53:40', '2021-07-14 13:54:53', '2/ao-phong-nu-license-1-marvel-crop-marvel-comics-debvl-0.jpg', '', NULL, NULL, '- Áo phông nữ Boo Stickers - NERD CHARM.<br />\r\n- In hình \"Phạt anh một chút - Chụt anh một phát\".<br />\r\n- Dáng áo rộng dễ dàng mix match cùng nhiều món đồ khác nhau.<br />\r\n- Chất liệu cotton thoáng mát, đường may chắc chắn.<br />\r\n- Số đo mẫu: 185cm, 68kg.', 0, 0, 2),
 (18, 3, 'ÁO PHÔNG NỮ OVERSIZED KIM BĂNG', '250.00', NULL, '2021-07-08 12:53:18', '2021-07-14 13:54:53', '2/ao-phong-nu-oversized-kim-bang-solidden-blackden-1.jpg', '', NULL, NULL, '- Áo phông nữ Boo Stickers - NERD CHARM.<br />\r\n- In hình \"Phạt anh một chút - Chụt anh một phát\".<br />\r\n- Dáng áo rộng dễ dàng mix match cùng nhiều món đồ khác nhau.<br />\r\n- Chất liệu cotton thoáng mát, đường may chắc chắn.<br />\r\n- Số đo mẫu: 185cm, 68kg.', 0, 0, 2),
 (19, 3, 'ÁO PHÔNG Y2K TEE L PLAYLIST', '250.00', NULL, '2021-07-08 14:36:57', '2021-07-14 13:54:53', '1/ao-phong-y2k-tee-l-playlist-3gvpv-1.jpg', '', NULL, NULL, '- Áo phông nữ Boo Stickers - NERD CHARM.<br />\r\n- In hình \"Phạt anh một chút - Chụt anh một phát\".<br />\r\n- Dáng áo rộng dễ dàng mix match cùng nhiều món đồ khác nhau.<br />\r\n- Chất liệu cotton thoáng mát, đường may chắc chắn.<br />\r\n- Số đo mẫu: 185cm, 68kg.', 0, 0, 1),
-(26, 3, 'Anh Pảnh bắn tim, anh Pảnh múa 999 đóa hồng 01', '150.00', '0.00', '2021-07-14 14:02:38', '2021-07-19 23:55:14', '1/thatim.png', '1/no-image-product.png', '', '', '- thêm số lượng màu trắng', 0, 0, 1),
-(29, 3, 'Áo Tee UN graphic Doraemon BOOZilla', '145.00', '120.00', '2021-07-14 23:45:05', '2021-07-20 22:07:11', '1/209256228_1494760417525657_591475846915521528_n.jpg', '', '', '', 'test trung id mau', 1, 0, 1);
+(26, 3, 'Anh Pảnh bắn tim, anh Pảnh múa 999 đóa hồng 01', '150.00', NULL, '2021-07-14 14:02:38', '2021-08-23 17:04:29', '1/thatim.png', '1/no-image-product.png', '', '', '- thêm số lượng màu trắng', 1, 0, 1),
+(29, 3, 'Áo Tee UN graphic Doraemon BOOZilla', '145.00', '120.00', '2021-07-14 23:45:05', '2021-08-23 17:04:43', '1/209256228_1494760417525657_591475846915521528_n.jpg', '', '', '', 'test trung id mau', 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -571,15 +594,15 @@ CREATE TABLE `product_colors` (
 INSERT INTO `product_colors` (`procID`, `proID`, `procQuantity`, `procIsDelete`, `procStatus`, `coID`) VALUES
 (1, 1, 7, 0, 0, 1),
 (2, 1, 4, 0, 0, 2),
-(3, 1, 4, 0, 0, 3),
-(4, 2, 2, 0, 0, 1),
+(3, 1, 3, 0, 0, 3),
+(4, 2, 1, 0, 0, 1),
 (5, 2, 4, 0, 0, 2),
 (6, 2, 4, 0, 0, 3),
 (7, 2, 4, 0, 0, 4),
 (8, 2, 4, 0, 0, 5),
-(9, 3, 2, 0, 0, 2),
-(10, 3, 2, 0, 0, 6),
-(11, 10, 0, 0, 0, 1),
+(9, 3, 5, 0, 0, 2),
+(10, 3, 5, 0, 0, 6),
+(11, 10, 5, 0, 0, 1),
 (12, 10, 4, 0, 0, 4),
 (13, 11, 5, 0, 0, 1),
 (14, 11, 5, 0, 0, 2),
@@ -588,9 +611,9 @@ INSERT INTO `product_colors` (`procID`, `proID`, `procQuantity`, `procIsDelete`,
 (17, 12, 3, 0, 0, 1),
 (18, 12, 5, 0, 0, 2),
 (19, 13, 5, 0, 0, 4),
-(20, 13, 0, 0, 0, 2),
-(21, 14, 0, 0, 0, 1),
-(22, 15, 0, 0, 0, 2),
+(20, 13, 4, 0, 0, 2),
+(21, 14, 4, 0, 0, 1),
+(22, 15, 5, 0, 0, 2),
 (23, 16, 5, 0, 0, 4),
 (24, 16, 5, 0, 0, 5),
 (25, 17, 5, 0, 0, 1),
@@ -598,7 +621,7 @@ INSERT INTO `product_colors` (`procID`, `proID`, `procQuantity`, `procIsDelete`,
 (27, 18, 5, 0, 0, 4),
 (28, 19, 0, 0, 0, 1),
 (29, 19, 0, 0, 0, 2),
-(31, 14, 4, 0, 0, 2),
+(31, 14, 3, 0, 0, 2),
 (32, 15, 5, 0, 0, 5),
 (42, 26, 15, 0, 0, 1),
 (47, 29, 20, 0, 0, 1),
@@ -639,9 +662,10 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`uID`, `uFirstName`, `uLastName`, `uMobile`, `uEmail`, `uPassword`, `uProvince`, `uDistrict`, `uWards`, `uAddress`, `uRegisteredAt`, `uUpdateAt`, `uLastLogin`, `uIsDelete`, `uOtpCode`, `uTimeActiveOtp`, `uStatus`) VALUES
-(1, 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'c4ca4238a0b923820dcc509a6f75849b', 38, 395, 15541, 'Hoành Cừ', '2021-05-26 14:03:08', '0000-00-00 00:00:00', '2021-08-04 17:38:56', 0, '475781', '2021-08-04 10:22:39', 0),
-(15, 'le', 'minh', '0584699419', 'nguyenthiha6742@gmail.com', '616a1287fd70fd0e5feecef121abb685', NULL, NULL, NULL, NULL, '2021-08-04 22:47:24', '0000-00-00 00:00:00', '2021-08-04 22:48:22', 0, '317437', '2021-08-04 22:47:24', 0),
-(16, '123a', '123b', '0584699419', 'run23815@eoopy.com', 'c4ca4238a0b923820dcc509a6f75849b', NULL, NULL, NULL, NULL, '2021-08-04 22:51:30', '0000-00-00 00:00:00', NULL, 0, '884317', '2021-08-04 22:59:22', 0);
+(1, 'Lê Công', 'Tuấn Vũ', '054758494', 'tuanvu237362@gmail.com', 'c4ca4238a0b923820dcc509a6f75849b', 38, 395, 15541, 'Hoành Cừ', '2021-05-26 14:03:08', '2021-08-23 17:06:52', '2021-08-23 21:57:02', 0, '475781', '2021-08-04 10:22:39', 0),
+(15, 'le', 'minh', '0584699419', 'nguyenthiha6742@gmail.com', '483c2374a09a432901e1fff599ac9bfb', NULL, NULL, NULL, NULL, '2021-08-04 22:47:24', '2021-08-22 17:06:59', '2021-08-04 22:48:22', 0, '317437', '2021-08-04 22:47:24', 0),
+(16, '123a', '123b', '0584699419', 'run23815@eoopy.com', 'c4ca4238a0b923820dcc509a6f75849b', NULL, NULL, NULL, NULL, '2021-08-04 22:51:30', '2021-08-15 17:07:05', NULL, 0, '884317', '2021-08-04 22:59:22', 0),
+(17, 'Le', 'Nam', '0584695886', 'egs94539@zwoho.com', '668b47cfd5d6f694a767874745a9f660', NULL, NULL, NULL, NULL, '2021-08-23 21:56:03', '2021-08-23 21:56:03', NULL, 0, '333733', '2021-08-23 21:56:03', 2);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -762,13 +786,13 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT cho bảng `bill`
 --
 ALTER TABLE `bill`
-  MODIFY `biID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `biID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT cho bảng `bill_details`
 --
 ALTER TABLE `bill_details`
-  MODIFY `bidID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `bidID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -804,13 +828,13 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT cho bảng `logbuyproduct`
 --
 ALTER TABLE `logbuyproduct`
-  MODIFY `logBuyID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `logBuyID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT cho bảng `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `logID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=182;
+  MODIFY `logID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
 
 --
 -- AUTO_INCREMENT cho bảng `log_discount`
@@ -840,7 +864,7 @@ ALTER TABLE `product_colors`
 -- AUTO_INCREMENT cho bảng `user`
 --
 ALTER TABLE `user`
-  MODIFY `uID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `uID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
