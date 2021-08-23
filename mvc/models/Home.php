@@ -27,7 +27,7 @@
 
         //get products sale
         function getProductsSale(){
-		    $sql = "SELECT * FROM products WHERE proDiscount > 0 and proIsDelete = 0 and proStatus = 0 ORDER BY proCreateAt ASC LIMIT 0,10";
+		    $sql = "SELECT * FROM products WHERE proDiscount < proPrice and proIsDelete = 0 and proStatus = 0 ORDER BY proCreateAt ASC LIMIT 0,10";
 		    $result = $this->connection->query($sql);
 		    $data = array();
 		    while ($row = $result->fetch_assoc()){

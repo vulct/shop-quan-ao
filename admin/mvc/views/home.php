@@ -109,6 +109,7 @@
                                 <th style="width:60px;">#</th>
                                 <th>Name</th>
                                 <th>Customer</th>
+                                <th>Date</th>
                                 <th>Address</th>
                                 <th>Total</th>
                                 <th>Status</th>
@@ -119,7 +120,8 @@
                                 <tr>
                                     <td><?=$i?></td>
                                     <td>#<?=$bill['biName']?></td>
-                                    <td><?=$bill['biFirstName']." ".$bill['biLastName']?></td>
+                                    <td><?=$bill['biLastName']?></td>
+                                    <td><?=$bill['biCreateAt']?></td>
                                     <?php
                                     require_once('./mvc/models/DefaultFunction.php');
                                     $getAddress = new DefaultFunction();
