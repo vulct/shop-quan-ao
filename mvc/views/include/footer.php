@@ -47,7 +47,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <p>©  2021 BoShop All right reserved. <a href="#">team 20</a></p>
+                    <p>©  2021 BoShop All right reserved. <a href="#">team 22</a></p>
                 </div>
                 <div class="col-md-6 text-right"> <img src="public/assets/images/card-icon.png" alt="" > </div>
             </div>

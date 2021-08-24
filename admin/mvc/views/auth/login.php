@@ -112,7 +112,7 @@
                 <script>
                     document.write(new Date().getFullYear())
                 </script>,
-                <span>Designed by <a href="#" target="_blank">Team 20</a></span>
+                <span>Designed by <a href="#" target="_blank">Team 22</a></span>
             </div>
         </div>
     </footer>
